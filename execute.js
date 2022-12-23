@@ -2,12 +2,14 @@ const reg = require('./register');
 const helper = require('./helper');
 let register = reg.register;
 
+const address = new Map();
+
 module.exports = {
     execute: function(inst, line) {
         if(helper.isItSupportedInstruction(inst)) {
             return Execute[`${inst[0]}`](inst, line);
-        } else if(inst[0].includes(':')) {
-            return Execute[`${inst[1]}`](inst, line);
+        } else if(inst[0].includes(':')) { // use this
+            return Execute['label'](inst, line);
         } else {
             return [line, false];
         }
@@ -15,6 +17,11 @@ module.exports = {
 }
 
 const Execute = {
+    label: function (tokens, line) {
+        address.set(tokens[0], line);
+        module.exports.execute(tokens.slice(1), line);
+    },
+
     // r-type
     add: function (tokens, line) {
         let flag = true;
@@ -121,7 +128,7 @@ const Execute = {
         if(
         !helper.isItValidRegistered(tokens[1]) 
         && !helper.isItValidRegistered(tokens[2])
-        && !isInteger(+tokens[2])
+        && isNaN(tokens[3])
         ) {
             flag = false;
         }
@@ -143,7 +150,7 @@ const Execute = {
         if(
         !helper.isItValidRegistered(tokens[1]) 
         && !helper.isItValidRegistered(tokens[2])
-        && !isInteger(+tokens[2])
+        && isNaN(tokens[3])
         ) {
             flag = false;
         }
@@ -165,7 +172,7 @@ const Execute = {
         if(
         !helper.isItValidRegistered(tokens[1]) 
         && !helper.isItValidRegistered(tokens[2])
-        && !isInteger(+tokens[2])
+        && isNaN(tokens[3])
         ) {
             flag = false;
         }
@@ -187,7 +194,7 @@ const Execute = {
         if(
         !helper.isItValidRegistered(tokens[1]) 
         && !helper.isItValidRegistered(tokens[2])
-        && !isInteger(+tokens[2])
+        && isNaN(tokens[3])
         ) {
             flag = false;
         }
@@ -211,7 +218,7 @@ const Execute = {
         if(
         !helper.isItValidRegistered(tokens[1]) 
         && !helper.isItValidRegistered(tokens[2])
-        && !isInteger(+tokens[2])
+        && isNaN(tokens[3])
         ) {
             flag = false;
         }
@@ -233,7 +240,7 @@ const Execute = {
         if(
         !helper.isItValidRegistered(tokens[1]) 
         && !helper.isItValidRegistered(tokens[2])
-        && !isInteger(+tokens[2])
+        && isNaN(tokens[3])
         ) {
             flag = false;
         }
@@ -257,13 +264,13 @@ const Execute = {
         if(
         !helper.isItValidRegistered(tokens[1]) 
         && !helper.isItValidRegistered(tokens[2])
-        && !isInteger(+tokens[2])
+        && typeof tokens[2] !== 'string'
         ) {
             flag = false;
         }
 
-        if(register[tokens[2]] === register[tokens[3]])
-            line = +tokens[2] - 1;
+        if(flag && register[tokens[2]] === register[tokens[3]])
+            line = address.get(+tokens[2]) - 1;
 
         return [line, flag];
     },
@@ -275,14 +282,14 @@ const Execute = {
         if(
         !helper.isItValidRegistered(tokens[1]) 
         && !helper.isItValidRegistered(tokens[2])
-        && !isInteger(+tokens[2])
+        && typeof tokens[2] !== 'string'
         ) {
             flag = false;
         }
 
-        if(register[tokens[2]] !== register[tokens[3]])
-            line = +tokens[2] - 1;
-            
+        if(flag && register[tokens[2]] !== register[tokens[3]])
+            line = address.get(+tokens[2]) - 1;
+
         return [line, flag];
     },
     bgt: function (tokens, line) {
@@ -293,14 +300,14 @@ const Execute = {
         if(
         !helper.isItValidRegistered(tokens[1]) 
         && !helper.isItValidRegistered(tokens[2])
-        && !isInteger(+tokens[2])
+        && typeof tokens[2] !== 'string'
         ) {
             flag = false;
         }
 
-        if(register[tokens[2]] > register[tokens[3]])
-            line = +tokens[2] - 1;
-            
+        if(flag && register[tokens[2]] > register[tokens[3]])
+            line = address.get(+tokens[2]) - 1;
+
         return [line, flag];
     },
     bge: function (tokens, line) {
@@ -311,14 +318,14 @@ const Execute = {
         if(
         !helper.isItValidRegistered(tokens[1]) 
         && !helper.isItValidRegistered(tokens[2])
-        && !isInteger(+tokens[2])
+        && typeof tokens[2] !== 'string'
         ) {
             flag = false;
         }
 
-        if(register[tokens[2]] >= register[tokens[3]])
-            line = +tokens[2] - 1;
-            
+        if(flag && register[tokens[2]] >= register[tokens[3]])
+            line = address.get(+tokens[2]) - 1;
+
         return [line, flag];
     },
     blt: function (tokens, line) {
@@ -329,14 +336,14 @@ const Execute = {
         if(
         !helper.isItValidRegistered(tokens[1]) 
         && !helper.isItValidRegistered(tokens[2])
-        && !isInteger(+tokens[2])
+        && typeof tokens[2] !== 'string'
         ) {
             flag = false;
         }
 
-        if(register[tokens[2]] < register[tokens[3]])
-            line = +tokens[2] - 1;
-            
+        if(flag && register[tokens[2]] < register[tokens[3]])
+            line = address.get(+tokens[2]) - 1;
+
         return [line, flag];
     },
     ble: function (tokens, line) {
@@ -347,14 +354,14 @@ const Execute = {
         if(
         !helper.isItValidRegistered(tokens[1]) 
         && !helper.isItValidRegistered(tokens[2])
-        && !isInteger(+tokens[2])
+        && typeof tokens[2] !== 'string'
         ) {
             flag = false;
         }
 
-        if(register[tokens[2]] <= register[tokens[3]])
-            line = +tokens[2] - 1;
-            
+        if(flag && register[tokens[2]] <= register[tokens[3]])
+            line = address.get(+tokens[2]) - 1;
+
         return [line, flag];
     },
 
@@ -365,23 +372,28 @@ const Execute = {
         if(tokens.length !== 2)
             flag = false;
 
-        if(
-        !helper.isItValidRegistered(tokens[1]) 
-        && !helper.isItValidRegistered(tokens[2])
-        && !isInteger(+tokens[2])
-        ) {
+        if(typeof tokens[1] !== 'string') {
             flag = false;
         }
 
-        if(register[tokens[2]] === register[tokens[3]])
-            line = +tokens[2] - 1;
+        if(flag)
+            line = address.get(+tokens[1]) - 1;
             
         return [line, flag];
     },
 
     // print
-    print: function(tokens, line) {
-        console.log(register[tokens[1]]);
+    print: function (tokens, line) {
+        let flag = true;
+        if(tokens.length !== 2)
+            flag = false;
+
+        if(!helper.isItValidRegistered(tokens[1]))
+            flag = false;
+
+        console.log(tokens[1], register[tokens[1]]);
+            
+        return [line, flag];
     },
 
   }

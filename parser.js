@@ -18,7 +18,8 @@ const program = fs.readFileSync('code.mps').toString().split("\n")
 for(let i = 0; i < program.length; i++) {
     const inst = program[i];
 
-    const ok = ex.execute(inst, i);
+    const [line, ok] = ex.execute(inst, i);
+    i = line;
     
     if(!ok) {
         console.log(`Syntax Error at line ${i + 1}`);
