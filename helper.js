@@ -1,7 +1,8 @@
-const reg = require('./register');
-let register = reg.register;
+const ds = require('./ds');
 
-const instruction = new Set(['label', 'add', 'sub', 'mul', 'and', 'or', 'addi', 'subi', 'andi', 'ori', 'sll', 'srl', 'beq', 'bne', 'bgt', 'bge', 'blt', 'ble', 'j', 'print']);
+let register = ds.register;
+const instruction = ds.instruction;
+
 module.exports = {
     isItSupportedInstruction: function(inst) {
         return instruction.has(inst[0]);

@@ -1,8 +1,8 @@
-const reg = require('./register');
 const helper = require('./helper');
-let register = reg.register;
+const ds = require('./ds');
 
-const address = new Map();
+let register = ds.register;
+const address = ds.address;
 
 module.exports = {
     execute: function(inst, line) {
